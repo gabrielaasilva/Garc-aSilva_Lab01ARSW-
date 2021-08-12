@@ -14,6 +14,9 @@ import static org.junit.Assert.*;
  * @author hcadavid
  */
 public class PiCalcTest {
+    /*
+
+    private PiDigits PiDigits;
 
     public PiCalcTest() {
     }
@@ -48,5 +51,6 @@ public class PiCalcTest {
             }
         }
     }
+    */
 
 }
