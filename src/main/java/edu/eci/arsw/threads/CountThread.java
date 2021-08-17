@@ -6,9 +6,9 @@
 package edu.eci.arsw.threads;
 
 /**
- *Define el ciclo de vida de un hilo que imprime por pantalla los números entre A y B.
- */ 
-
+ *
+ * @author hcadavid
+ */
 public class CountThread extends Thread{
     int ini = 0 , fin = 0 ;
     public CountThread(int ini, int fin ){

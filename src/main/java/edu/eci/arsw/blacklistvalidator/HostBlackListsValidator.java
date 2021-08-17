@@ -6,6 +6,10 @@
 package edu.eci.arsw.blacklistvalidator;
 
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
+import edu.eci.arsw.spamkeywordsdatasource.validation;
+
+import java.lang.management.GarbageCollectorMXBean;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -61,7 +65,54 @@ public class HostBlackListsValidator {
         
         return blackListOcurrences;
     }
-    
+    public  List<Integer> checkHost(String server,int n){
+        LinkedList<Integer> blackListOcurrences=new LinkedList<>();
+        HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
+        HostBlackListsValidator hblv = new HostBlackListsValidator();
+        ArrayList<validation> vArray = new ArrayList<validation>();
+
+        for(int i = 0; i<n  ; i++){
+            //System.out.println(i*(skds.getRegisteredServersCount()/n) + " --  "+ (i+1)*(skds.getRegisteredServersCount()/n));
+            int fraccion = skds.getRegisteredServersCount()/n;
+
+            if(i == n-1){
+                vArray.add(new validation(i*(fraccion)  , ((i+1)*(fraccion) + (skds.getRegisteredServersCount() - (i+1)*(fraccion))  )  ,server));
+            }
+            else{
+                vArray.add(new validation(i*(fraccion)  , (i+1)*(fraccion) ,server));
+            }
+            vArray.get(i).start();
+        }
+
+        boolean valid = true;
+        int cont = 0;
+        while(valid){
+            for(int i=0; i< vArray.size(); i++){
+                if (vArray.get(i) != null && !vArray.get(i).isAlive()){
+                    blackListOcurrences.addAll(vArray.get(i).getBlackListOcurrences());
+                    vArray.set(i,null);
+                    cont ++;
+
+                }
+                if (cont == vArray.size() || blackListOcurrences.size()>= hblv.getBlackListAlarmCount() ){
+                    valid = false;
+                }
+            }
+        }
+        if (blackListOcurrences.size()>= hblv.getBlackListAlarmCount()){
+            skds.reportAsNotTrustworthy(server);
+        }
+
+        else{
+            skds.reportAsTrustworthy(server);
+        }
+        return blackListOcurrences;
+    }
+
+
+    public int getBlackListAlarmCount(){
+        return BLACK_LIST_ALARM_COUNT;
+    }
     
     private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
     
